@@ -10,6 +10,11 @@ import type {
   Span,
   SpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
+import {
+  CompositePropagator,
+  W3CTraceContextPropagator,
+  W3CBaggagePropagator,
+} from "@opentelemetry/core";
 
 const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 
@@ -48,8 +53,16 @@ export function register() {
   provider.addSpanProcessor(new SentrySpanProcessor());
   provider.addSpanProcessor(new NextJsSpanProcessor());
 
+  const propagator = new CompositePropagator({
+    propagators: [
+      new SentryPropagator(),
+      new W3CTraceContextPropagator(),
+      new W3CBaggagePropagator(),
+    ],
+  });
+
   provider.register({
-    propagator: new SentryPropagator(),
+    propagator,
     contextManager: new Sentry.SentryContextManager(),
   });
 
