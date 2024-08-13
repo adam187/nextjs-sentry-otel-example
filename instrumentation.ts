@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/node";
+import * as Sentry from "@sentry/nextjs";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import {
   SentrySpanProcessor,
@@ -40,7 +40,9 @@ export function register() {
   });
 
   const provider = new NodeTracerProvider({
-    sampler: sentryClient ? new SentrySampler(sentryClient) : undefined,
+    sampler: (sentryClient as any)
+      ? new SentrySampler(sentryClient as any)
+      : undefined,
   });
 
   provider.addSpanProcessor(new SentrySpanProcessor());
